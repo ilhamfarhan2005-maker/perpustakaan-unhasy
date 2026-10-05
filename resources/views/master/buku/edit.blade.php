@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800">Edit Buku</h2>
     </x-slot>
@@ -80,4 +80,4 @@
             </form>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

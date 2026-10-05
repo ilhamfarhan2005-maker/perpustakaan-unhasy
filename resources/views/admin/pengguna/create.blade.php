@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="font-semibold text-xl">Tambah Pengguna</h2>
     </x-slot>
@@ -10,4 +10,4 @@
             </form>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="text-xl font-semibold text-gray-800">Manajemen Denda</h2>
     </x-slot>
@@ -80,4 +80,4 @@
             <div class="border-t border-gray-100 px-4 py-3">{{ $denda->links() }}</div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

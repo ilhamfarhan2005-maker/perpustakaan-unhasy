@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800">Dashboard Pustakawan</h2>
     </x-slot>
@@ -7,4 +7,4 @@
             <p>Selamat datang di dashboard pustakawan.</p>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

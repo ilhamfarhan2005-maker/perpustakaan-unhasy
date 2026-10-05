@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="text-xl font-semibold text-gray-800">Detail Peminjaman</h2>
     </x-slot>
@@ -36,4 +36,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

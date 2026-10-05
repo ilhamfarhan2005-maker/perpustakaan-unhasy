@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800">Manajemen Pengguna</h2>
     </x-slot>
@@ -65,4 +65,4 @@
             <div class="mt-4">{{ $users->links() }}</div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

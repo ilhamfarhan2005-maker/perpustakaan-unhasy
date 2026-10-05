@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-xl font-semibold text-gray-800">Peminjaman Aktif</h2>
@@ -78,4 +78,4 @@
             <div class="border-t border-gray-100 px-4 py-3">{{ $transaksi->links() }}</div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

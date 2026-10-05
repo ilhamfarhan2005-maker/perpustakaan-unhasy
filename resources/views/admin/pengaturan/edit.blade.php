@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800">Pengaturan</h2>
     </x-slot>
@@ -8,4 +8,4 @@
             <p>Halaman pengaturan akan diisi pada fase berikutnya.</p>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>

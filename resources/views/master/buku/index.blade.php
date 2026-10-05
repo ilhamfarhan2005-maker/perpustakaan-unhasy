@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.panel>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800">Manajemen Buku</h2>
@@ -82,4 +82,4 @@
             <div class="mt-4">{{ $buku->links() }}</div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.panel>
