@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Book;
 use App\Models\Fine;
+use App\Models\FinePayment;
 use App\Models\Setting;
 use App\Models\Transaction;
 use App\Models\User;
@@ -23,9 +24,16 @@ class TransaksiService
             return [false, 'Hanya mahasiswa yang dapat meminjam buku.'];
         }
 
-        $hasUnpaidFine = Fine::whereHas('transaction', fn ($query) => $query->where('user_id', $user->id))
-            ->where('status', 'belum_lunas')
-            ->exists();
+        $hasUnpaidFine = Fine::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)
+                ->orWhereHas('transaction', fn ($transaction) => $transaction->where('user_id', $user->id));
+        })->where(function ($query) {
+            $query->where('status', 'belum_lunas')
+                ->orWhere(function ($status) {
+                    $status->where('status', '!=', 'lunas')
+                        ->where('payment_status', '!=', 'lunas');
+                });
+        })->exists();
 
         if ($hasUnpaidFine) {
             return [false, 'Anggota masih memiliki denda yang belum dilunasi. Selesaikan dulu di menu Denda.'];
@@ -69,6 +77,10 @@ class TransaksiService
                 throw ValidationException::withMessages(['nim_nip' => $alasan]);
             }
 
+            if (! $book->hasPhysicalCopy()) {
+                throw ValidationException::withMessages(['isbn' => 'Buku digital tidak dapat dipinjam secara fisik.']);
+            }
+
             if ($book->stock < 1) {
                 throw ValidationException::withMessages(['isbn' => "Stok buku \"{$book->title}\" sedang habis."]);
             }
@@ -83,6 +95,7 @@ class TransaksiService
                 'borrow_date' => $borrowDate,
                 'due_date' => $borrowDate->copy()->addDays($duration),
                 'status' => 'dipinjam',
+                'workflow_status' => 'Dipinjam',
             ]);
 
             $book->decrement('stock');
@@ -91,16 +104,21 @@ class TransaksiService
         });
     }
 
-    public function prosesPengembalian(Transaction $transaksi): array
+    public function prosesPengembalian(Transaction $transaksi, ?User $petugas = null): array
     {
-        return DB::transaction(function () use ($transaksi) {
+        return DB::transaction(function () use ($transaksi, $petugas) {
             $transaksi = Transaction::whereKey($transaksi->id)->lockForUpdate()->firstOrFail();
             if (! in_array($transaksi->status, ['dipinjam', 'terlambat'], true)) {
                 throw ValidationException::withMessages(['transaction' => 'Transaksi ini sudah selesai.']);
             }
 
             $today = now()->startOfDay();
-            $transaksi->update(['return_date' => $today, 'status' => 'selesai']);
+            $transaksi->update([
+                'return_date' => $today,
+                'status' => 'selesai',
+                'workflow_status' => 'Selesai',
+                'returned_confirmed_by' => $petugas?->id ?? $transaksi->returned_confirmed_by,
+            ]);
             $book = Book::whereKey($transaksi->book_id)->lockForUpdate()->firstOrFail();
             $book->increment('stock');
 
@@ -109,11 +127,19 @@ class TransaksiService
             if ($daysLate > 0) {
                 $fine = Fine::create([
                     'transaction_id' => $transaksi->id,
+                    'user_id' => $transaksi->user_id,
                     'amount' => $amount,
                     'days_late' => $daysLate,
                     'status' => 'belum_lunas',
+                    'payment_status' => 'belum_dibayar',
                 ]);
             }
+
+            $transaksi->studentRequest?->update([
+                'status' => 'dikembalikan',
+                'tanggal_kembali' => $today,
+                'workflow_status' => 'Selesai',
+            ]);
 
             return [
                 'transaction' => $transaksi->fresh(),
@@ -152,13 +178,20 @@ class TransaksiService
         });
     }
 
-    public function bayarDenda(Fine $fine, float $paidAmount): Fine
+    public function bayarDenda(Fine $fine, float $paidAmount, User $verifier): Fine
     {
-        return DB::transaction(function () use ($fine, $paidAmount) {
+        return DB::transaction(function () use ($fine, $paidAmount, $verifier) {
             $fine = Fine::whereKey($fine->id)->lockForUpdate()->firstOrFail();
 
-            if ($fine->status === 'lunas') {
+            if ($fine->isLunas()) {
                 throw ValidationException::withMessages(['fine' => 'Denda ini sudah lunas sebelumnya.']);
+            }
+
+            if ($fine->payment_status === 'menunggu_verifikasi'
+                || $fine->payments()->where('status', 'menunggu')->exists()) {
+                throw ValidationException::withMessages([
+                    'fine' => 'Denda sedang menunggu verifikasi pembayaran QRIS.',
+                ]);
             }
 
             if ($paidAmount < (float) $fine->amount) {
@@ -167,7 +200,22 @@ class TransaksiService
                 ]);
             }
 
-            $fine->update(['paid_at' => now(), 'paid_amount' => $paidAmount, 'status' => 'lunas']);
+            $payment = FinePayment::create([
+                'user_id' => $fine->user_id ?? $fine->transaction()->value('user_id'),
+                'method' => 'tunai',
+                'amount' => $paidAmount,
+                'status' => 'terverifikasi',
+                'verified_by' => $verifier->id,
+                'verified_at' => now(),
+            ]);
+            $payment->fines()->attach($fine->id);
+
+            $fine->update([
+                'paid_at' => now(),
+                'paid_amount' => $paidAmount,
+                'status' => 'lunas',
+                'payment_status' => 'lunas',
+            ]);
 
             return $fine->fresh();
         });

@@ -16,7 +16,7 @@
     ];
 @endphp
 
-<section {{ $attributes->merge(['class' => 'flex min-w-0 items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm']) }}>
+<section {{ $attributes->merge(['class' => 'surface-card flex min-w-0 items-start justify-between gap-4 p-5']) }}>
     <div class="min-w-0">
         <p class="text-sm font-medium text-gray-500">{{ $label }}</p>
         <p class="mt-2 break-words text-2xl font-bold text-gray-900">{{ $value }}</p>

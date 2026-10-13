@@ -14,6 +14,8 @@ class Setting extends Model
         'max_borrow_per_user' => 'Batas maksimal peminjaman per anggota',
         'borrow_duration_days' => 'Durasi standar peminjaman (hari)',
         'max_extension' => 'Batas maksimal perpanjangan',
+        'qris_image_path' => 'Gambar QRIS pembayaran denda',
+        'digital_preview_pages' => 'Jumlah halaman pratinjau buku digital',
     ];
 
     public static function get(string $key, $default = null): mixed

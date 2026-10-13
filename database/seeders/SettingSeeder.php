@@ -14,6 +14,7 @@ class SettingSeeder extends Seeder
             'max_borrow_per_user' => '3',
             'borrow_duration_days' => '7',
             'max_extension' => '2',
+            'qris_image_path' => '',
         ];
 
         foreach ($defaults as $key => $value) {

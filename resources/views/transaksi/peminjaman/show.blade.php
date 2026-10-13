@@ -10,9 +10,14 @@
                 <p class="mt-1 font-mono text-xl font-bold text-green-800">TRX-{{ str_pad($transaksi->id, 6, '0', STR_PAD_LEFT) }}</p>
             </div>
             <dl class="grid grid-cols-1 gap-x-6 gap-y-4 px-5 py-5 text-sm sm:grid-cols-2">
-                <div><dt class="text-gray-500">Peminjam</dt><dd class="mt-1 font-medium text-gray-900">{{ $transaksi->user->name }} ({{ $transaksi->user->nim_nip }})</dd></div>
+                <div>
+                    <dt class="text-gray-500">Peminjam</dt>
+                    <dd class="mt-1 font-medium text-gray-900">{{ $transaksi->user->name }} ({{ $transaksi->user->nim_nip }})</dd>
+                    <a href="{{ route('pustakawan.anggota.kartu-qr', $transaksi->user) }}" class="mt-2 inline-block text-xs font-medium text-green-800 hover:underline">Cetak Kartu Anggota</a>
+                </div>
                 <div><dt class="text-gray-500">Buku</dt><dd class="mt-1 font-medium text-gray-900">{{ $transaksi->book->title }}</dd></div>
                 <div><dt class="text-gray-500">ISBN</dt><dd class="mt-1 text-gray-900">{{ $transaksi->book->isbn }}</dd></div>
+                <div><dt class="text-gray-500">Kode inventaris</dt><dd class="mt-1 text-gray-900">{{ $transaksi->book->kode_inventaris }}</dd><a href="{{ route('pustakawan.buku.label-qr', $transaksi->book) }}" class="mt-2 inline-block text-xs font-medium text-green-800 hover:underline">Cetak Label QR Buku</a></div>
                 <div><dt class="text-gray-500">Petugas</dt><dd class="mt-1 text-gray-900">{{ $transaksi->handler->name ?? '-' }}</dd></div>
                 <div><dt class="text-gray-500">Tanggal pinjam</dt><dd class="mt-1 text-gray-900">{{ $transaksi->borrow_date->translatedFormat('d F Y') }}</dd></div>
                 <div><dt class="text-gray-500">Jatuh tempo</dt><dd class="mt-1 font-semibold text-gray-900">{{ $transaksi->due_date->translatedFormat('d F Y') }}</dd></div>

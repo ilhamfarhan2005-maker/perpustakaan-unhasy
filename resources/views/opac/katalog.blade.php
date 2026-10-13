@@ -70,13 +70,14 @@
                 {{ $buku->links() }}
             </div>
         @else
-            <div class="bg-white rounded-xl border border-dashed border-gray-300 p-10 text-center">
-                <div class="text-5xl mb-3">🔍</div>
-                <h3 class="text-lg font-semibold text-gray-700">Buku tidak ditemukan</h3>
-                <p class="text-sm text-gray-500 mt-1">
-                    Coba kata kunci lain atau
-                    <a href="{{ route('katalog.index') }}" class="text-green-700 hover:underline">lihat semua koleksi</a>.
-                </p>
+            <div class="opac-empty-search" role="status">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <circle cx="21" cy="21" r="13" />
+                    <path stroke-linecap="round" d="m30.5 30.5 9 9M16 18h10M16 23h7" />
+                </svg>
+                <h3>Buku yang Anda cari tidak ditemukan.</h3>
+                <p>Silakan gunakan kata kunci lain.</p>
+                <a href="{{ route('katalog.index') }}">Lihat seluruh koleksi</a>
             </div>
         @endif
     </div>

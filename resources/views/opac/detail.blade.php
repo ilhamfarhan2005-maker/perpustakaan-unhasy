@@ -34,19 +34,24 @@
                     <p class="text-gray-600 mt-1">oleh <strong>{{ $buku->author }}</strong></p>
 
                     <div class="mt-3 flex flex-wrap gap-2">
-                        @if($buku->stock > 0)
-                            <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full font-medium">
-                                ✓ Tersedia ({{ $buku->stock }} eksemplar)
-                            </span>
-                        @else
-                            <span class="bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full font-medium">
-                                ✗ Sedang Dipinjam Semua
+                        <span class="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium">
+                            {{ ['fisik' => 'Fisik', 'digital' => 'Digital', 'fisik_digital' => 'Fisik dan digital'][$buku->format] ?? 'Fisik' }}
+                        </span>
+                        @if($buku->hasPhysicalCopy())
+                            @if($buku->stock > 0)
+                                <span class="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full font-medium">
+                                    ✓ Tersedia ({{ $buku->stock }} eksemplar)
+                                </span>
+                            @else
+                                <span class="bg-red-100 text-red-800 text-sm px-3 py-1 rounded-full font-medium">
+                                    ✗ Sedang Dipinjam Semua
+                                </span>
+                            @endif
+
+                            <span class="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">
+                                📍 Rak {{ $buku->rak_location }}
                             </span>
                         @endif
-
-                        <span class="bg-yellow-100 text-yellow-800 text-sm px-3 py-1 rounded-full">
-                            📍 Rak {{ $buku->rak_location }}
-                        </span>
 
                         @if($buku->category)
                             <a href="{{ route('katalog.index', ['kategori' => $buku->category->slug]) }}"
@@ -73,32 +78,65 @@
                             <dt class="text-gray-500">Kategori</dt>
                             <dd class="font-medium">{{ $buku->category->name ?? '-' }}</dd>
                         </div>
-                        <div class="flex justify-between border-b border-dashed py-1.5">
-                            <dt class="text-gray-500">Stok</dt>
-                            <dd class="font-medium">{{ $buku->stock }} eksemplar</dd>
-                        </div>
-                        <div class="flex justify-between border-b border-dashed py-1.5">
-                            <dt class="text-gray-500">Lokasi Rak</dt>
-                            <dd class="font-medium">{{ $buku->rak_location }}</dd>
-                        </div>
+                        @if($buku->hasPhysicalCopy())
+                            <div class="flex justify-between border-b border-dashed py-1.5">
+                                <dt class="text-gray-500">Stok</dt>
+                                <dd class="font-medium">{{ $buku->stock }} eksemplar</dd>
+                            </div>
+                            <div class="flex justify-between border-b border-dashed py-1.5">
+                                <dt class="text-gray-500">Lokasi Rak</dt>
+                                <dd class="font-medium">{{ $buku->rak_location }}</dd>
+                            </div>
+                        @endif
                     </dl>
+
+                    @if($buku->preview_path)
+                        <a href="{{ route('katalog.preview', $buku) }}" class="inline-flex rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Baca Pratinjau</a>
+                    @elseif($buku->preview_url)
+                        <a href="{{ $buku->preview_url }}" target="_blank" rel="noopener noreferrer"
+                           class="inline-block mt-5 bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg font-medium">
+                            Baca Pratinjau
+                        </a>
+                    @endif
 
                     <div class="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg text-sm">
                         @guest
                             <p class="text-green-900">
-                                💡 Ingin meminjam buku ini? Silakan
-                                <a href="{{ route('login') }}" class="font-semibold underline">login</a>
-                                atau
-                                <a href="{{ route('register') }}" class="font-semibold underline">daftar</a>
-                                sebagai mahasiswa, lalu tunjukkan NIM Anda ke pustakawan.
+                                @if($buku->hasPhysicalCopy())
+                                    💡 Ingin meminjam buku ini? Silakan
+                                    <a href="{{ route('login') }}" class="font-semibold underline">login</a>
+                                    atau
+                                    <a href="{{ route('register') }}" class="font-semibold underline">daftar</a>
+                                    sebagai mahasiswa, lalu tunjukkan NIM Anda ke pustakawan.
+                                @else
+                                    Buku digital dapat dibaca melalui tautan pratinjau di atas.
+                                @endif
                             </p>
                         @else
                             @if(auth()->user()->isMahasiswa())
-                                <p class="text-green-900">
-                                    💡 Untuk meminjam, silakan tunjukkan
-                                    <strong>NIM {{ auth()->user()->nim_nip }}</strong>
-                                    ke pustakawan di loket. Buku akan dicatat oleh pustakawan.
-                                </p>
+                                @if(!$buku->hasPhysicalCopy())
+                                    <p class="text-green-900">Buku digital tidak dapat dipinjam secara fisik.</p>
+                                @elseif(session('success'))
+                                    <p class="text-green-900">{{ session('success') }}</p>
+                                @elseif($errors->has('buku'))
+                                    <p class="text-red-700">{{ $errors->first('buku') }}</p>
+                                @elseif($pengajuanAktif)
+                                    <p class="text-green-900">
+                                        Pengajuan Anda untuk buku ini berstatus <strong>{{ $pengajuanAktif->status }}</strong>.
+                                    </p>
+                                @elseif($buku->stock > 0)
+                                    <p class="text-green-900 mb-3">
+                                        Ajukan peminjaman menggunakan akun mahasiswa Anda.
+                                    </p>
+                                    <form method="POST" action="{{ route('mahasiswa.peminjaman.store', $buku) }}">
+                                        @csrf
+                                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium">
+                                            Ajukan Peminjaman
+                                        </button>
+                                    </form>
+                                @else
+                                    <p class="text-green-900">Buku belum tersedia untuk dipinjam.</p>
+                                @endif
                             @else
                                 <p class="text-green-900">
                                     Anda login sebagai <strong>{{ auth()->user()->role }}</strong>.

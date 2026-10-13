@@ -24,4 +24,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function fines(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Fine::class);
+    }
+
+    public function finePayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(FinePayment::class);
+    }
 }

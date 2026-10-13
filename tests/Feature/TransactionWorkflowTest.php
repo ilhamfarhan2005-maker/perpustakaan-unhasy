@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class TransactionWorkflowTest extends TestCase
@@ -153,6 +154,74 @@ class TransactionWorkflowTest extends TestCase
         $this->get(route('pustakawan.peminjaman.create'))->assertOk();
         $this->get(route('pustakawan.pengembalian.index'))->assertOk();
         $this->get(route('pustakawan.denda.index'))->assertOk();
+    }
+
+    public function test_student_dashboard_displays_real_summary_and_recent_loans(): void
+    {
+        $student = $this->makeUser('Mahasiswa Aktif', 'mahasiswa', '2023010002');
+        $staff = $this->makeUser('Pustakawan', 'pustakawan', 'PST002');
+        $book = $this->makeBook(3);
+
+        $activeLoan = Transaction::create([
+            'user_id' => $student->id,
+            'book_id' => $book->id,
+            'handled_by' => $staff->id,
+            'borrow_date' => now()->subDays(2)->toDateString(),
+            'due_date' => now()->addDays(5)->toDateString(),
+            'status' => 'dipinjam',
+        ]);
+
+        $completedLoan = Transaction::create([
+            'user_id' => $student->id,
+            'book_id' => $book->id,
+            'handled_by' => $staff->id,
+            'borrow_date' => now()->subDays(10)->toDateString(),
+            'due_date' => now()->subDays(3)->toDateString(),
+            'return_date' => now()->subDays(2)->toDateString(),
+            'status' => 'selesai',
+        ]);
+
+        Fine::create([
+            'transaction_id' => $completedLoan->id,
+            'amount' => 15000,
+            'days_late' => 2,
+            'status' => 'belum_lunas',
+        ]);
+
+        $this->actingAs($student)
+            ->get(route('mahasiswa.dashboard'))
+            ->assertOk()
+            ->assertSee('Peminjaman Aktif')
+            ->assertSee('Denda Belum Lunas')
+            ->assertSee('Riwayat Peminjaman')
+            ->assertSee('1')
+            ->assertSee('Rp 15.000');
+    }
+
+    public function test_book_creation_generates_and_saves_qr_code(): void
+    {
+        $admin = $this->makeUser('Admin QR', 'admin', 'ADM001');
+        $category = Category::create(['name' => 'Teknologi', 'slug' => 'teknologi']);
+
+        $this->actingAs($admin)
+            ->post(route('pustakawan.buku.store'), [
+                'category_id' => $category->id,
+                'title' => 'Laravel untuk Pemula',
+                'isbn' => '9780000000009',
+                'author' => 'Rizky Aji',
+                'publisher' => 'Penerbit Uji',
+                'year' => 2025,
+                'rak_location' => 'A-1',
+                'stock' => 5,
+            ])
+            ->assertRedirect(route('pustakawan.buku.index'));
+
+        $book = Book::where('isbn', '9780000000009')->firstOrFail();
+        $this->assertNotNull($book->qr_code);
+        $this->assertTrue(
+            Storage::disk('public')->exists($book->qr_code),
+            'QR file expected to exist in public storage.'
+        );
     }
 
     private function makeUser(string $name, string $role, string $nimNip): User

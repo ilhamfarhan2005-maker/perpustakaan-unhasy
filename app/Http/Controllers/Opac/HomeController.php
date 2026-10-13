@@ -10,18 +10,33 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $bukuTerbaru = Book::with('category')->latest()->take(8)->get();
-        $totalBuku = Book::count();
-        $totalKategori = Category::count();
-        $totalTersedia = Book::where('stock', '>', 0)->count();
-        $kategoriList = Category::withCount('books')->orderBy('name')->get();
+        $totalBooks = Book::count();
+        $availableBooks = Book::whereIn('format', ['fisik', 'fisik_digital'])
+            ->where('stock', '>', 0)
+            ->count();
+        $totalCategories = Category::count();
+        $categories = Category::withCount('books')->orderBy('name')->get();
+        $latestBooks = Book::with('category')->latest()->take(8)->get();
+        $popularBooks = Book::with('category')
+            ->withCount('transactions')
+            ->orderByDesc('transactions_count')
+            ->latest()
+            ->take(5)
+            ->get();
 
-        return view('opac.home', compact(
-            'bukuTerbaru',
-            'totalBuku',
-            'totalKategori',
-            'totalTersedia',
-            'kategoriList'
-        ));
+        return view('welcome', compact(
+            'totalBooks',
+            'availableBooks',
+            'totalCategories',
+            'categories',
+            'latestBooks',
+            'popularBooks',
+        ))->with([
+            'bukuTerbaru' => $latestBooks,
+            'totalBuku' => $totalBooks,
+            'totalTersedia' => $availableBooks,
+            'totalKategori' => $totalCategories,
+            'kategoriList' => $categories,
+        ]);
     }
 }

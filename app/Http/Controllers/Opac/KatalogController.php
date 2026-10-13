@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Opac;
 use App\Http\Controllers\Controller;
 use App\Models\Book;
 use App\Models\Category;
+use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 
 class KatalogController extends Controller
@@ -29,7 +30,8 @@ class KatalogController extends Controller
         }
 
         if ($request->filled('tersedia') && $request->tersedia === '1') {
-            $query->where('stock', '>', 0);
+            $query->whereIn('format', ['fisik', 'fisik_digital'])
+                ->where('stock', '>', 0);
         }
 
         $buku = $query->latest()->paginate(12)->withQueryString();
@@ -44,7 +46,13 @@ class KatalogController extends Controller
             ->where('id', '!=', $buku->id)
             ->take(4)
             ->get();
+        $pengajuanAktif = auth()->check() && auth()->user()->isMahasiswa()
+            ? Peminjaman::where('user_id', auth()->id())
+                ->where('buku_id', $buku->id)
+                ->whereIn('status', ['pending', 'dipinjam'])
+                ->first()
+            : null;
 
-        return view('opac.detail', compact('buku', 'serupa'));
+        return view('opac.detail', compact('buku', 'serupa', 'pengajuanAktif'));
     }
 }

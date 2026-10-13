@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('rak_location');
             $table->unsignedInteger('stock')->default(0);
             $table->string('cover_image')->nullable();
+            $table->string('qr_code')->nullable();
             $table->timestamps();
 
             $table->index('title');

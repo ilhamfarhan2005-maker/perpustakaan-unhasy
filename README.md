@@ -65,3 +65,16 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 # perpustakaan-unhasy
+
+## Pemindai QR sirkulasi
+
+Pemindai kamera pada formulir peminjaman dan pengembalian memakai `html5-qrcode`. Browser hanya memberikan akses kamera pada koneksi HTTPS atau alamat localhost. Untuk pengembangan melalui Laragon, gunakan `http://localhost` atau aktifkan SSL Laragon lalu akses situs melalui HTTPS. Alamat HTTP khusus seperti `http://perpustakaan-unhasy.test` tidak mendapat izin kamera.
+
+Jika kamera tidak tersedia, masukkan NIM, ISBN, kode inventaris, atau kode transaksi secara manual. Pemindai barcode USB juga dapat digunakan karena hasil pindainya masuk sebagai teks pada kolom aktif; tekan Enter untuk mencari atau mengirim formulir.
+
+## Kedaluwarsa pengajuan peminjaman
+
+Pengajuan mahasiswa yang belum diproses akan kedaluwarsa setelah 24 jam dan tidak lagi menahan ketersediaan stok. Scheduler menjalankan pemeriksaan setiap menit. Pada server, jalankan `php artisan schedule:run` melalui penjadwal sistem setiap menit; untuk pengembangan lokal, jalankan `php artisan schedule:work`. Perintah `php artisan peminjaman:expire-requests` juga dapat dijalankan untuk memproses kedaluwarsa secara langsung.
+# Perpustakaan Digital UNHASY
+
+Untuk unggah buku digital PDF hingga 20 MB di Laragon, atur `upload_max_filesize` dan `post_max_size` di `php.ini` menjadi setidaknya `20M`, lalu restart Apache/PHP.

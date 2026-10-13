@@ -11,6 +11,13 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                'unhasy-green': {
+                    DEFAULT: '#059669',
+                    dark: '#047857',
+                },
+                terracotta: '#d95a2b',
+            },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },

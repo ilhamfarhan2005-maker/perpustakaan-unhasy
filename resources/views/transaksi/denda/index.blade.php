@@ -37,15 +37,19 @@
                                 <td class="px-4 py-3 text-center text-gray-600">{{ $d->days_late }} hari</td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right font-mono font-medium">Rp {{ number_format($d->amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3">
-                                    @if($d->status === 'lunas')
+                                    @if($d->isLunas())
                                         <span class="rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-800">Lunas</span>
                                         <div class="mt-1 text-xs text-gray-500">{{ $d->paid_at?->format('d/m/Y H:i') }}</div>
+                                    @elseif($d->payment_status === 'menunggu_verifikasi')
+                                        <span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">Menunggu verifikasi</span>
+                                    @elseif($d->payment_status === 'ditolak')
+                                        <span class="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">Pembayaran ditolak</span>
                                     @else
                                         <span class="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">Belum lunas</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    @if($d->status === 'belum_lunas')
+                                    @if(! $d->isLunas() && $d->payment_status !== 'menunggu_verifikasi' && ! $d->payments->contains(fn ($payment) => $payment->status === 'menunggu'))
                                         <div x-data="{ open: false }" class="inline-block">
                                             <button type="button" @click="open = true" class="rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white hover:bg-green-800">Catat pelunasan</button>
                                             <div x-cloak x-show="open" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/50 p-4" @keydown.escape.window="open = false" @click.self="open = false">

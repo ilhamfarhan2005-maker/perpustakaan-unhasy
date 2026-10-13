@@ -7,6 +7,82 @@
     </x-slot>
 
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        @if($pengajuanPinjam->isNotEmpty())
+            <section class="mb-6 overflow-hidden rounded-lg border border-amber-200 bg-white shadow-sm">
+                <div class="border-b border-amber-100 bg-amber-50 px-4 py-3">
+                    <h3 class="font-semibold text-amber-900">Pengajuan dari Mahasiswa</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[700px] text-left text-sm">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                            <tr><th class="px-4 py-3">Mahasiswa</th><th class="px-4 py-3">Buku</th><th class="px-4 py-3">Tanggal pengajuan</th><th class="px-4 py-3 text-right">Aksi</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($pengajuanPinjam as $pengajuan)
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="font-medium">{{ $pengajuan->user->name }}</div>
+                                        <div class="font-mono text-xs text-gray-500">{{ $pengajuan->user->nim_nip }}</div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="font-medium">{{ $pengajuan->buku->title }}</div>
+                                        <div class="text-xs text-gray-500">Stok fisik: {{ $pengajuan->buku->stock }}</div>
+                                    </td>
+                                    <td class="px-4 py-3">{{ $pengajuan->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="inline-flex gap-2">
+                                            <form method="POST" action="{{ route('pustakawan.pengajuan.proses', $pengajuan) }}">
+                                                @csrf
+                                                <input type="hidden" name="action" value="setujui">
+                                                <button class="rounded-md bg-green-700 px-3 py-2 text-xs font-semibold text-white hover:bg-green-800">Setujui</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('pustakawan.pengajuan.proses', $pengajuan) }}" class="flex gap-2">
+                                                @csrf
+                                                <input type="hidden" name="action" value="tolak">
+                                                <label class="sr-only" for="alasan-{{ $pengajuan->id }}">Alasan penolakan</label>
+                                                <input id="alasan-{{ $pengajuan->id }}" name="alasan_penolakan" required maxlength="1000" placeholder="Alasan penolakan" class="w-36 rounded-md border-gray-300 text-xs">
+                                                <button class="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50">Tolak</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @endif
+
+        @if($pengajuanKembali->isNotEmpty())
+            <section class="mb-6 overflow-hidden rounded-lg border border-blue-200 bg-white shadow-sm">
+                <div class="border-b border-blue-100 bg-blue-50 px-4 py-3">
+                    <h3 class="font-semibold text-blue-900">Pengajuan Pengembalian dari Mahasiswa</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[700px] text-left text-sm">
+                        <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+                            <tr><th class="px-4 py-3">Mahasiswa</th><th class="px-4 py-3">Buku</th><th class="px-4 py-3">Waktu pengajuan</th><th class="px-4 py-3 text-right">Aksi</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($pengajuanKembali as $pengajuan)
+                                <tr>
+                                    <td class="px-4 py-3">{{ $pengajuan->user->name }} <span class="font-mono text-xs text-gray-500">({{ $pengajuan->user->nim_nip }})</span></td>
+                                    <td class="px-4 py-3">{{ $pengajuan->book->title }}</td>
+                                    <td class="px-4 py-3">{{ $pengajuan->return_requested_at->format('d/m/Y H:i') }}</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <form method="POST" action="{{ route('pustakawan.pengembalian.store', $pengajuan) }}" onsubmit="return confirm('Konfirmasi pengembalian buku ini?')">
+                                            @csrf
+                                            <button class="rounded-md bg-blue-700 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800">Konfirmasi</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @endif
+
         <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             <form method="GET" class="flex flex-wrap gap-2 border-b border-gray-100 p-4">
                 <label for="search" class="sr-only">Cari peminjaman</label>

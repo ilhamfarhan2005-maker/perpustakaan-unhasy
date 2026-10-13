@@ -20,9 +20,20 @@
                     <div><span class="font-semibold text-gray-600">Penulis:</span> {{ $buku->author }}</div>
                     <div><span class="font-semibold text-gray-600">Penerbit:</span> {{ $buku->publisher }}</div>
                     <div><span class="font-semibold text-gray-600">ISBN:</span> {{ $buku->isbn }}</div>
+                    <div><span class="font-semibold text-gray-600">Format:</span> {{ ['fisik' => 'Fisik', 'digital' => 'Digital', 'fisik_digital' => 'Fisik dan digital'][$buku->format] ?? 'Fisik' }}</div>
+                    <div><span class="font-semibold text-gray-600">Kode Inventaris:</span> {{ $buku->kode_inventaris }}</div>
                     <div><span class="font-semibold text-gray-600">Tahun:</span> {{ $buku->year }}</div>
-                    <div><span class="font-semibold text-gray-600">Rak:</span> {{ $buku->rak_location }}</div>
-                    <div><span class="font-semibold text-gray-600">Stok:</span> {{ $buku->stock }}</div>
+                    @if($buku->hasPhysicalCopy())
+                        <div><span class="font-semibold text-gray-600">Rak:</span> {{ $buku->rak_location }}</div>
+                        <div><span class="font-semibold text-gray-600">Stok:</span> {{ $buku->stock }}</div>
+                    @endif
+                    @if($buku->preview_url)
+                        <div>
+                            <a href="{{ $buku->preview_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                                Baca Pratinjau
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </div>
 
