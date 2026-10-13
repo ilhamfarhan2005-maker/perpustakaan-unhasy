@@ -13,6 +13,8 @@ class PerpanjanganController extends Controller
 
     public function store(Transaction $transaksi)
     {
+        $this->authorize('update', $transaksi);
+
         [$sukses, $hasil] = $this->service->perpanjang($transaksi);
         if (! $sukses) {
             return back()->with('error', $hasil);

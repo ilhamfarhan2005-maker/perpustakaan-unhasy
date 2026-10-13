@@ -1,6 +1,16 @@
 # Progress Proyek
 
+## LKP Pertemuan 7 — Policy, Model Factory, Seeder & Testing
+
+Status: selesai.
+
+- Model Factory lengkap dengan states: `CategoryFactory`, `BookFactory` (fisik, digital, fisikDigital, stokHabis), `TransactionFactory` (dipinjam, terlambat, selesai, menungguKonfirmasiKembali), `FineFactory`, `FinePaymentFactory`, dan `PeminjamanFactory` (diajukan, ditolak, kedaluwarsa).
+- Otorisasi granular berbasis Policy (`BookPolicy`, `TransactionPolicy`, `FinePaymentPolicy`) diimplementasikan via `$this->authorize()` pada seluruh controller terkait.
+- Seeder realistis & idempotent: 8 kategori, 40 buku (campuran format), 25 transaksi sirkulasi query dinamis, denda, dan pengajuan peminjaman.
+- Verifikasi: `php artisan migrate:fresh --seed` sukses; `php artisan test` 100% lulus (91 tes, 427 assertions).
+
 ## Tahap D — Kartu Anggota Digital Mahasiswa
+
 
 Status: selesai.
 

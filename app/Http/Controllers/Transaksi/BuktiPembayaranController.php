@@ -11,14 +11,10 @@ class BuktiPembayaranController extends Controller
 {
     public function show(FinePayment $payment): BinaryFileResponse
     {
-        $user = request()->user();
-        abort_unless(
-            in_array($user->role, ['admin', 'pustakawan'], true)
-                || ($user->isMahasiswa() && $payment->user_id === $user->id),
-            403
-        );
+        $this->authorize('view', $payment);
         abort_unless($payment->proof_path && Storage::disk('local')->exists($payment->proof_path), 404);
 
         return response()->file(Storage::disk('local')->path($payment->proof_path));
     }
+
 }

@@ -10,8 +10,20 @@ class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (['Teknologi Informasi', 'Sastra', 'Agama', 'Ekonomi', 'Pendidikan'] as $name) {
+        $categories = [
+            'Teknologi Informasi',
+            'Sastra',
+            'Agama',
+            'Ekonomi',
+            'Pendidikan',
+            'Hukum',
+            'Sains & Matematika',
+            'Sejarah & Filsafat',
+        ];
+
+        foreach ($categories as $name) {
             Category::updateOrCreate(['slug' => Str::slug($name)], ['name' => $name]);
         }
+
     }
 }

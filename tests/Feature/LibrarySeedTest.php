@@ -17,7 +17,7 @@ class LibrarySeedTest extends TestCase
         $this->artisan('migrate:fresh --seed')->assertSuccessful();
 
         $this->assertSame(4, User::count());
-        $this->assertSame(6, Book::count());
+        $this->assertSame(40, Book::count());
         $this->assertSame('1000', Setting::get('fine_per_day'));
         $this->assertDatabaseHas('books', ['format' => 'fisik']);
         $this->assertDatabaseHas('books', ['format' => 'digital']);

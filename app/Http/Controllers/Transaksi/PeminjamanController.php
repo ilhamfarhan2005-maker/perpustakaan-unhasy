@@ -26,6 +26,8 @@ class PeminjamanController extends Controller
 
     public function index(Request $request): View
     {
+        $this->authorize('viewAny', Transaction::class);
+
         $query = Transaction::with(['user', 'book', 'handler'])
             ->whereIn('status', ['dipinjam', 'terlambat']);
 
@@ -55,8 +57,11 @@ class PeminjamanController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Transaction::class);
+
         return view('transaksi.peminjaman.create');
     }
+
 
     public function identify(IdentifikasiPeminjamanRequest $request): JsonResponse
     {
@@ -101,6 +106,8 @@ class PeminjamanController extends Controller
 
     public function store(StorePeminjamanRequest $request): RedirectResponse
     {
+        $this->authorize('create', Transaction::class);
+
         $data = $request->validated();
         $user = User::where('nim_nip', $data['nim_nip'])->first();
         if (! $user) {
@@ -137,6 +144,8 @@ class PeminjamanController extends Controller
 
     public function show(Transaction $transaksi)
     {
+        $this->authorize('view', $transaksi);
+
         $transaksi->load(['user', 'book', 'handler', 'fine']);
 
         return view('transaksi.peminjaman.show', compact('transaksi'));

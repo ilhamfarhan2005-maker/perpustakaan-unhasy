@@ -15,7 +15,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             BookSeeder::class,
+            TransactionSeeder::class,
+            FineSeeder::class,
+            PeminjamanSeeder::class,
             DemoWorkflowSeeder::class,
         ]);
+
     }
 }

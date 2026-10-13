@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Fine extends Model
 {
+    use HasFactory;
+
     public const PAYMENT_STATUSES = ['belum_dibayar', 'menunggu_verifikasi', 'lunas', 'ditolak'];
 
     protected $fillable = [

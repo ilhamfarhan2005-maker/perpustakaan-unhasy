@@ -17,6 +17,8 @@ class PengembalianController extends Controller
 
     public function index(CariPengembalianRequest $request)
     {
+        $this->authorize('viewAny', Transaction::class);
+
         $search = trim((string) $request->validated('search', ''));
         $query = Transaction::with(['user', 'book'])
             ->whereIn('status', ['dipinjam', 'terlambat']);
@@ -46,6 +48,8 @@ class PengembalianController extends Controller
 
     public function store(ProsesPengembalianRequest $request, Transaction $transaksi)
     {
+        $this->authorize('update', $transaksi);
+
         try {
             $hasil = $this->service->prosesPengembalian($transaksi, $request->user());
         } catch (ValidationException $exception) {

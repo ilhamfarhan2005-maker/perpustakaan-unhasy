@@ -18,6 +18,8 @@ class BukuController extends Controller
     public function __construct(private BookPreviewService $previews) {}
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Book::class);
+
         $query = Book::with('category');
 
         if ($request->filled('search')) {
@@ -45,6 +47,8 @@ class BukuController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Book::class);
+
         $kategori = Category::orderBy('name')->get();
 
         return view('master.buku.create', compact('kategori'));
@@ -52,6 +56,8 @@ class BukuController extends Controller
 
     public function store(StoreBukuRequest $request)
     {
+        $this->authorize('create', Book::class);
+
         $data = $request->validated();
 
         if ($request->hasFile('cover_image')) {
@@ -84,11 +90,15 @@ class BukuController extends Controller
 
     public function show(Book $buku)
     {
+        $this->authorize('view', $buku);
+
         return view('master.buku.show', compact('buku'));
     }
 
     public function edit(Book $buku)
     {
+        $this->authorize('update', $buku);
+
         $kategori = Category::orderBy('name')->get();
 
         return view('master.buku.edit', compact('buku', 'kategori'));
@@ -96,6 +106,8 @@ class BukuController extends Controller
 
     public function update(UpdateBukuRequest $request, Book $buku)
     {
+        $this->authorize('update', $buku);
+
         $data = $request->validated();
 
         if ($request->hasFile('cover_image')) {
@@ -118,6 +130,8 @@ class BukuController extends Controller
 
     public function destroy(Book $buku)
     {
+        $this->authorize('delete', $buku);
+
         $sedangDipinjam = $buku->transactions()->where('status', 'dipinjam')->exists();
         if ($sedangDipinjam) {
             return back()->with('error', "Buku \"{$buku->title}\" tidak bisa dihapus karena sedang dipinjam.");

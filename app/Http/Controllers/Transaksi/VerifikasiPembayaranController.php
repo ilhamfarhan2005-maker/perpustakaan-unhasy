@@ -13,6 +13,8 @@ class VerifikasiPembayaranController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', FinePayment::class);
+
         $payments = FinePayment::with(['user', 'fines.transaction.book'])
             ->where('status', 'menunggu')
             ->oldest()
@@ -23,6 +25,8 @@ class VerifikasiPembayaranController extends Controller
 
     public function update(VerifyFinePaymentRequest $request, FinePayment $payment)
     {
+        $this->authorize('verify', $payment);
+
         $data = $request->validated();
         DB::transaction(function () use ($request, $payment, $data) {
             $payment = FinePayment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
